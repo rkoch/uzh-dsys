@@ -1,0 +1,53 @@
+/ScalaTest
+
+.cache
+
+build-base-local.properties
+build-local.properties
+
+# Default Eclipse ignores
+*.pydevproject
+.metadata/
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+
+# Default Git ignores
+*.orig
+*.patch
+
+# Default Java ignores
+*.class
+*.jar
+*.war
+*.ear
+
+# Default Scala ignores
+*.class
+*.log
+
+# sbt specific
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# Scala-IDE specific
+.scala_dependencies
+
+# Ignores for OS X
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Ignores for Windows
+Thumbs.db 
+Desktop.ini
+$RECYCLE.BIN/

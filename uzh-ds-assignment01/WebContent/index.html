@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="title" content="Distributed Systems 2013" />
+<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0" />
+<meta http-equiv="description" content="Distributed Systems 2013, Course Project" />
+<title>Distributed Systems 2013</title>
+<link href="style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<script type="text/javascript">
+    function showResponseMessage() {
+    var query = document.getElementById("query").value;
+     var httpRequest;
+     
+         if (window.XMLHttpRequest) { // Mozilla, Safari, ...
+             httpRequest = new XMLHttpRequest();
+         } else if (window.ActiveXObject) { // IE
+             try {
+                 httpRequest = new ActiveXObject("Msxml2.XMLHTTP");
+             }
+             catch (e) {
+                 try {
+                     httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
+                 }
+                 catch (e) {}
+             }
+         }
+     
+         if (!httpRequest) {
+             alert('Error making XMLHTTP instance');
+             return false;
+         }
+         httpRequest.open('GET', "http://localhost:8080?q="+query, true);
+         httpRequest.send();
+        
+        httpRequest.onreadystatechange = function(){
+            if (httpRequest.readyState === 4) {
+                if (httpRequest.status === 200) {
+                    str = ("<li>"+ httpRequest.responseText +"</li>");
+                    document.getElementById("responseArea").innerHTML=str;
+                } else {
+                    alert('Error getting response from server');
+                }
+            }
+        }
+    }
+</script>
+
+<body>
+
+<header>
+	<h2>Distributed Systems 2013</h2>
+    <small>Course Project</small>
+    <br /><br />
+</header>
+
+<div id="button">
+<input type="text" name="query" id="query" class="ixform" value="Query" rel="Query" />
+<a href="#" id="clickButton" class="botton mxp" onclick="showResponseMessage()">Load Server Response</a>
+
+<section id="messagelist">
+	<ul id="responseArea">
+    </ul>
+</section>
+</div>
+
+<div class="clear bottom"></div>
+
+</body>
+</html>

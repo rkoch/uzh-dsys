@@ -1,0 +1,67 @@
+@import url(http://fonts.googleapis.com/css?family=Libre+Baskerville:400,700,400italic);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:700);
+
+body, html, p, form, h1, h2, h3, ul, li {
+	margin: 0px;
+	padding: 0px;	
+}
+
+body, html {
+	text-align: center;
+	background-color:#FFF;	
+	width: 100%;
+	height: 100%;
+}
+
+div, header {
+	color:#333;
+	font-family: 'Libre Baskerville', serif;
+	text-shadow: 1px 1px 1px #FFF;
+}
+
+.mxp {
+	font-family: 'Open Sans', serif;
+	text-transform:uppercase;
+}
+
+.clear {
+	clear: both;	
+}
+
+.bottom {
+	padding-bottom: 20px;
+}	
+
+header {
+	width: 90%;
+	margin: 0px auto;
+	padding: 50px 0 20px 0;	
+}
+
+a {
+	text-decoration: none;
+	color:#111;	
+}
+
+.botton {
+	padding: 20px;
+	display: block;
+	color:#999;
+}
+
+#button {
+	width: 70%;
+	margin: 0px auto;	
+}
+
+
+#messagelist {
+	text-align:center;
+	margin: 0px auto;	
+}
+
+#messagelist li {
+	list-style: none;
+	border-bottom: 1px solid #CCC;	
+	padding: 16px 0;
+}
