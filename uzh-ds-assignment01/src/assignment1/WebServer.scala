@@ -35,10 +35,10 @@ class WorkerStateRequestHandler() extends HttpHandler {
   }
 }
 
-object RetrievalSystem{
+object RetrievalSystem {
   //TODO(Student): You have to implement this. You can remove the if-else block. See instructions for more information
-  def getResult(query: String) : String = {
-    if(query == "pigs")
+  def getResult(query: String): String = {
+    if (query == "pigs")
       "1465 2319"
     else
       "it works!"
