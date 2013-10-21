@@ -2,9 +2,17 @@ package assignment1
 import java.net.InetSocketAddress
 import com.sun.net.httpserver.{ HttpExchange, HttpHandler, HttpServer }
 import java.util.concurrent.Executors
+import java.net.URLDecoder
+import scala.io.Codec
+import java.net.Socket
+import java.io.PrintWriter
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
-class WebServer(port: Int) {
+class WebServer(port: Int, pTextPort: Int) {
+  RetrievalSystem.init(pTextPort)
   val address = new InetSocketAddress(port)
+  val textPort = pTextPort;
   val server = HttpServer.create(address, 0)
   server.createContext("/", new WorkerStateRequestHandler())
   server.setExecutor(Executors.newCachedThreadPool())
@@ -21,7 +29,6 @@ class WorkerStateRequestHandler() extends HttpHandler {
     val requestMethod = exchange.getRequestMethod
     if (requestMethod.equalsIgnoreCase("GET")) {
       val queryResult = RetrievalSystem.getResult(exchange.getRequestURI().getRawQuery().replaceFirst("q=", ""))
-
       val responseHeaders = exchange.getResponseHeaders
       responseHeaders.set("Content-Type", "text/html")
       responseHeaders.set("Access-Control-Allow-Origin", "*");
@@ -36,11 +43,31 @@ class WorkerStateRequestHandler() extends HttpHandler {
 }
 
 object RetrievalSystem {
-  //TODO(Student): You have to implement this. You can remove the if-else block. See instructions for more information
-  def getResult(query: String): String = {
-    if (query == "pigs")
-      "1465 2319"
-    else
-      "it works!"
+  var port = 1337
+  var socket: Socket = null
+
+  def init(pPort: Int) {
+    port = pPort
   }
+
+  def getResult(query: String): String = {
+    // URL Decode the input query
+    val decodedQuery = URLDecoder.decode(query, Codec.UTF8.toString)
+
+    if (socket == null) {
+      socket = new Socket("localhost", port)
+    }
+
+    val out = new PrintWriter(socket.getOutputStream())
+    val in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
+    out.println(decodedQuery);
+    out.flush()
+
+    // Read return
+    val ret = in.readLine
+
+    // return value
+    ret
+  }
+
 }
