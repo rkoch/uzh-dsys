@@ -6,7 +6,6 @@ import java.io.PrintStream
 import java.net.ServerSocket
 import java.net.Socket
 
-import scala.actors.Actor
 import scala.collection.{ mutable => mut }
 import scala.io.Codec
 import scala.io.Source
@@ -17,31 +16,39 @@ class TextProcessingServer(port: Int) {
   private var doShutdown = false
 
   private val listener = new ServerSocket(port)
-  Actor.actor {
-    while (!doShutdown) { // infinite loop -> waiting for connection attempts
-      val socket = listener.accept()
-      connectionPool += Client(socket, new BufferedReader(new InputStreamReader(socket.getInputStream())), new PrintStream(socket.getOutputStream()));
+  val tListener = new Thread(new Runnable() {
+    def run() {
+      while (!doShutdown) { // infinite loop -> waiting for connection attempts
+        val socket = listener.accept()
+        connectionPool += Client(socket, new BufferedReader(new InputStreamReader(socket.getInputStream())), new PrintStream(socket.getOutputStream()));
+      }
     }
-  }
+  })
+  tListener.start
 
-  Actor.actor {
-    while (!doShutdown) {
-      connectionPool.retain((client) => {
-        if (client.socket.isConnected()) {
-          if (client.is.ready) {
-            val query = client.is.readLine
-            client.os.println(InvertedIndex.get(query));
+  val tProcess = new Thread(new Runnable() {
+    def run() {
+
+      while (!doShutdown) {
+        connectionPool.retain((client) => {
+          if (client.socket.isConnected()) {
+            if (client.is.ready) {
+              val query = client.is.readLine
+              client.os.println(InvertedIndex.get(query));
+            }
+            true
+          } else {
+            false
           }
-          true
-        } else {
-          false
-        }
-      })
+        })
 
-      // short timeout to lower cpu usage
-      Thread.sleep(50)
+        // short timeout to lower cpu usage
+        Thread.sleep(50)
+      }
+
     }
-  }
+  })
+  tProcess.start
 
   def shutdown() {
     doShutdown = true;
