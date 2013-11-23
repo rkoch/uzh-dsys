@@ -82,6 +82,8 @@ public class FreqWords
         jobSort.setInputFormat(SequenceFileInputFormat.class);
         jobSort.setOutputFormat(TextOutputFormat.class);
 
+        jobSort.set(Utils.CONF_OUTPUT_SEPARATOR_KEY, " ");
+
         SequenceFileInputFormat.addInputPath(jobSort, new Path(CACHE_LOCATION));
         FileSystem.get(jobSort).delete(new Path(pArgs[0]), true);
         FileOutputFormat.setOutputPath(jobSort, new Path(pArgs[0]));
