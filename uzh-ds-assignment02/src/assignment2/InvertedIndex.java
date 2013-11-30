@@ -1,6 +1,6 @@
 /*
  * Distributed Systems 2013
- * Assignment 2: Freq-Words
+ * Assignment 2: Inverted Index
  * Remo Koch, 12-728-291
  */
 package assignment2;

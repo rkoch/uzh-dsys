@@ -1,16 +1,21 @@
+/*
+ * Distributed Systems 2013
+ * Assignment 2: CreateDB
+ * Remo Koch, 12-728-291
+ */
 package assignment2;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -20,10 +25,9 @@ import org.apache.hadoop.fs.Path;
 
 public class CreateDB {
 
-    private static final String JDBC_SQLITE_FORMAT = "jdbc:sqlite:%s";
+    private Connection mConnection;
+    private String     mDBPath;
 
-    private Connection          mConnection;
-    private String              mDBPath;
 
     public int run(String[] pArgs) {
         // validate cli args
@@ -46,8 +50,7 @@ public class CreateDB {
             return 2;
         }
         long end = System.currentTimeMillis();
-
-        System.out.printf("Create and init database: %dms%n", end - start);
+//        System.out.printf("Create and init database: %dms%n", end - start);
 
         // Read and load inverted index (task 3)
         start = System.currentTimeMillis();
@@ -59,8 +62,7 @@ public class CreateDB {
             return 3;
         }
         end = System.currentTimeMillis();
-
-        System.out.printf("Load inverted index: %dms%n", end - start);
+//        System.out.printf("Load inverted index: %dms%n", end - start);
 
         // Read and load actors (task 4)
         start = System.currentTimeMillis();
@@ -72,8 +74,7 @@ public class CreateDB {
             return 4;
         }
         end = System.currentTimeMillis();
-
-        System.out.printf("Load actors: %dms%n", end - start);
+//        System.out.printf("Load actors: %dms%n", end - start);
 
         try {
             closeConnection();
@@ -85,9 +86,11 @@ public class CreateDB {
         return 0;
     }
 
+
     private void printUsage(PrintStream pStream) {
-        pStream.printf("usage: %s [Task 3 HDFS Location] [Task 4 HDFS Location] [Local DB Location]", getClass().getName());
+        pStream.printf("usage: %s [Task 3 HDFS Location] [Task 4 HDFS Location] [Local DB Location]%n", getClass().getName());
     }
+
 
     private void createAndInitDatabase()
             throws Exception {
@@ -115,11 +118,10 @@ public class CreateDB {
         List<Path> files = new ArrayList<Path>();
 
         Configuration hadoopConf = new Configuration();
-//        hadoopConf.addResource(new Path("core-site.xml"));
-//        hadoopConf.addResource(new Path("hdfs-site.xml"));
-//
-//        FileSystem fs = FileSystem.get(new URI(hadoopConf.get("fs.default.name")), hadoopConf);
-        FileSystem fs = FileSystem.get(hadoopConf);
+        hadoopConf.addResource(new Path("/home/ds2013/hadoop/hadoop-1.2.1/conf/core-site.xml"));
+        hadoopConf.addResource(new Path("/home/ds2013/hadoop/hadoop-1.2.1/conf/hdfs-site.xml"));
+
+        FileSystem fs = FileSystem.get(new URI(hadoopConf.get("fs.default.name")), hadoopConf);
 
         FileStatus[] fstatus = fs.listStatus(pHdfsPath);
 
@@ -175,11 +177,10 @@ public class CreateDB {
         List<Path> files = new ArrayList<Path>();
 
         Configuration hadoopConf = new Configuration();
-//        hadoopConf.addResource(new Path("core-site.xml"));
-//        hadoopConf.addResource(new Path("hdfs-site.xml"));
-//
-//        FileSystem fs = FileSystem.get(new URI(hadoopConf.get("fs.default.name")), hadoopConf);
-        FileSystem fs = FileSystem.get(hadoopConf);
+        hadoopConf.addResource(new Path("/home/ds2013/hadoop/hadoop-1.2.1/conf/core-site.xml"));
+        hadoopConf.addResource(new Path("/home/ds2013/hadoop/hadoop-1.2.1/conf/hdfs-site.xml"));
+
+        FileSystem fs = FileSystem.get(new URI(hadoopConf.get("fs.default.name")), hadoopConf);
 
         FileStatus[] fstatus = fs.listStatus(pHdfsPath);
 
@@ -200,22 +201,20 @@ public class CreateDB {
             int counter = 0;
             String line = null;
             while ((line = br.readLine()) != null) {
+                // Escape double quotes for DB inserts
+                line = line.replaceAll("\"", "\"\"");
+
                 // Parse entry
-                StringTokenizer itr = new StringTokenizer(line, "\t");
-                String id = itr.nextToken();
-                String name = itr.nextToken().replaceAll("\"", "\"\"");
-                StringBuilder actors = new StringBuilder();
-                while (itr.hasMoreTokens()) {
-                    String actor = itr.nextToken();
-                    if (actors.length() > 0) {
-                        actors.append(", ");
-                    }
-                    actor = actor.replaceAll("\"", "\"\"");
-                    actors.append(actor);
+                String[] split = line.split("\t", 3);
+                String id = split[0];
+                String name = split[1];
+                String actors = "";
+                if (split.length >= 3) {
+                    actors = split[2];
                 }
 
                 try {
-                    s.executeUpdate(String.format(SQLConst.SQL_INSERT_MOVIE, id, name, actors.toString()));
+                    s.executeUpdate(String.format(SQLConst.SQL_INSERT_MOVIE, id, name, actors));
                 } catch (Exception pEx) {
                     throw new Exception("Error in line [" + line + "]", pEx);
                 }
@@ -238,7 +237,7 @@ public class CreateDB {
     private Connection getConnection()
             throws Exception {
 
-        // Load the jdbc driver as we are on the old JDBC API version
+        // Load the jdbc driver since we are on the old JDBC API version
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException pEx) {
@@ -251,7 +250,7 @@ public class CreateDB {
 
         // pool the connection
         if ((mConnection == null) || mConnection.isClosed()) {
-            String path = String.format(JDBC_SQLITE_FORMAT, mDBPath);
+            String path = String.format(SQLConst.JDBC_SQLITE_FORMAT, mDBPath);
             mConnection = DriverManager.getConnection(path);
         }
 

@@ -50,6 +50,7 @@ public class FreqWords
     @Override
     public int run(String[] pArgs)
             throws Exception {
+        // Extract and count words config
         JobConf jobCount = new JobConf(getConf(), FreqWords.class);
         jobCount.setJobName("freqwords-extract");
 
@@ -67,6 +68,7 @@ public class FreqWords
         FileSystem.get(jobCount).delete(new Path(CACHE_LOCATION), true);
         SequenceFileOutputFormat.setOutputPath(jobCount, new Path(CACHE_LOCATION));
 
+        // Sort words config
         JobConf jobSort = new JobConf(getConf(), FreqWords.class);
         jobSort.setJobName("freqwords-sort");
 
@@ -102,6 +104,7 @@ public class FreqWords
     }
 
 
+    // Reducer for extracting and counting words
     public static class ReducerClass
             extends MapReduceBase
             implements Reducer<Text, IntWritable, Text, IntWritable> {
@@ -118,6 +121,8 @@ public class FreqWords
 
     }
 
+
+    // Mapper for sorting words
     public static class SortMapperClass
             extends MapReduceBase
             implements Mapper<Text, IntWritable, IntWritable, Text> {
@@ -130,6 +135,7 @@ public class FreqWords
 
     }
 
+    // Reducer for sorting words
     public static class SortReducerClass
             extends MapReduceBase
             implements Reducer<IntWritable, Text, Text, IntWritable> {

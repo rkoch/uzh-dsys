@@ -1,3 +1,8 @@
+/*
+ * Distributed Systems 2013
+ * Internal class: Utils
+ * Remo Koch, 12-728-291
+ */
 package assignment2;
 
 import java.io.BufferedReader;
